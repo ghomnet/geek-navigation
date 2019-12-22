@@ -12,7 +12,7 @@
         label-width="100px"
       >
         <el-form-item
-          label="网站名称"
+          label="*网站名称"
           prop="name"
         >
           <el-input
@@ -21,7 +21,7 @@
           ></el-input>
         </el-form-item>
         <el-form-item
-          label="网站分类"
+          label="*网站分类"
           prop="classify"
         >
           <el-select
@@ -42,14 +42,13 @@
           ></el-input>
           <div
             class="add-classify-btn"
-            @click="isDiyClassify=true"
-            v-if="!isDiyClassify && !type"
+            @click="isDiyClassify=!isDiyClassify"
           >
-            <i class="el-icon-folder-add"></i>自定义分类
+            <i class="el-icon-folder-add"></i>{{isDiyClassify ? '选择分类' : '自定义分类'}}
           </div>
         </el-form-item>
         <el-form-item
-          label="网站链接"
+          label="*网站链接"
           prop="href"
         >
           <el-input　placeholder="http://www.baidu.com/" v-model="href"></el-input>
@@ -147,7 +146,9 @@ export default {
         // 如果没logo就默认一个
         // 验证通过
         data.time = new Date().getTime()
-        data.href += 'favicon.ico'
+        if (!data.logo) {
+          data.logo = data.href + 'favicon.ico'
+        }
         this.$message('提交成功，后台审核通过后才会显示')
         this.$emit('update:show', false)
 

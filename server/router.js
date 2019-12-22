@@ -1,19 +1,27 @@
-//引入express模块
 const express = require("express");
-//定义路由级中间件
 const router = express.Router();
-const mongoose = require('mongoose')
-
 //引入数据模型模块
+const app = express()
+const jwt = require('jsonwebtoken')
 const navData = require("./model/navSchema");
 const auditModel = require("./model/auditSchema");
-const account = require("./model/account");
-const jwt = require('jsonwebtoken');
-const app = express()
-const secret = '123123'; //密钥
-app.set('superSecret', secret);
+const userModel = require("./model/userSchema");
+const jwtAuth = require("./jwt")
+const { secretKey } = require('./config')
 
-// 导航站首页
+router.use(jwtAuth)
+
+router.use((req, res, next) => {
+  // 任何路由信息都会执行这里面的语句
+  // 把它交给下一个中间件，注意中间件的注册顺序是按序执行
+  next()
+})
+
+
+
+/**
+ * 请求导航首页
+ */
 router.get("/index", (req, res) => {
 	navData.find({})
 		.then(datas => {
@@ -25,81 +33,71 @@ router.get("/index", (req, res) => {
 		});
 });
 
+
+/**
+ * 提交一个导航到审核表
+ */
+router.post("/audit/add", (req) => {
+	auditModel.create(req.body, function () { })
+})
+
+
+/**
+ * 删除审核表中的导航
+ */
+router.post("/audit/del", (req) => {
+	auditModel.remove({ _id: req.body.id }, () => { })
+})
+
+
 /**
  * 审核表
  */
-
-// 提交一个导航
-router.post("/audit/add", (req) => {
-	// 创建一个新数据
-	auditModel.create(req.body, function () { })
-})
-// 删除、拒绝一个导航
-router.post("/audit/del", (req) => {
-	//使用Student model上的create方法储存数据
-	auditModel.remove({ _id: req.body.id }, (err, result) => { })
-})
-
-// 请求审核列表
 router.get("/audit/list", (req, res) => {
-	const token = req.headers.token
-	console.log('token:', token)
-	jwt.verify(token, app.get('superSecret'), function (err, decoded) {
-		console.log(decoded, err)
-		//decoded　是得到的用户信息
-		if (decoded.admin != secret) {
-			return res.status(401).send({
-				status: 401,
-				msg: 'No token provided.'
-			});
-		} else {
-			auditModel.find({})
-				.then(datas => {
-					let data = {}
-					data.data = datas
-					data.status = 200
-					data.msg = 'ok'
-					res.json(data);
-				})
-				.catch(err => {
-					res.json(err);
-				});
-		}
-	})
+	auditModel.find({})
+		.then(datas => {
+			let data = {}
+			data.data = datas
+			data.status = 200
+			data.msg = 'ok'
+			res.json(data);
+		})
+		.catch(err => {
+			res.json(err);
+		});
 });
 
-/**
- * 导航表
- */
 
-// 审核通过一个导航
+/**
+ * 添加审核表中的导航到导航表
+ */
 router.post("/nav/add", (req, res) => {
 	auditModel.remove({ _id: req.body.id }, (err, result) => { })
 	navData.update({ classify: req.body.classify }, { $push: { sites: req.body.sites } }, function (res, err) {
-		if (err.n === 0) {
-			// 创建一个新数据
-			navData.create(req.body, function () { })
-		}
+		if (err.n === 0) navData.create(req.body, function () { })
 	})
 })
 
-// 删除一个导航
+
+/**
+ * 删除导航表中的导航
+ */
 router.post("/nav/del", (req, res) => {
-	navData.update({ _id: req.body.id }, { $pull: { sites: { name: req.body.name } } }, function (res, err) {
-		console.log(res, err)
-	})
+	navData.update({ _id: req.body.id }, { $pull: { sites: { name: req.body.name } } }, () => { })
 })
 
-// 编辑导航
+
+/**
+ * 编辑导航表中的导航
+ */
 router.post("/nav/edit", (req, res) => {
 	const { id, sites: {
 		href
 	} } = req.body
-	navData.update({ _id: id }, { $pull: { sites: { href: href } } }, function(success, err) {
-		if (err) console.log(`错误了`, err)
+	navData.update({ _id: id }, { $pull: { sites: { href: href } } }, (success, err) => {
 	})
 
-	navData.update({ classify: req.body.classify }, { $push: { sites: req.body.sites } }, function () {
+	navData.update({ classify: req.body.classify }, { $push: { sites: req.body.sites } }, () => {
 		res.json({
 			status: 200,
 			msg: 'ok',
@@ -109,27 +107,71 @@ router.post("/nav/edit", (req, res) => {
 
 
 /**
- * 登录路由
+ * 查找某个id的导航
  */
+router.post("/nav/find", (req, res) => {
+	const { id } = req.body
+	navData.find({ _id: id })
+		.then(datas => {
+			res.json(datas);
+		})
+		.catch(err => {
+			res.json(err);
+		});
+})
 
-// 登录
-router.post("/login", (req, res) => {
+
+/**
+ * 登录
+ */
+router.post("/login", async (req, res) => {
 	const { account, pwd } = req.body
 
+	const users = await userModel.find({isAdmin: true})
+	const {username, password} = users[0]
+
 	// 判断账号密码
-	if (account != 'admin' || pwd != secret) {
+	if (account != username || pwd != password) {
 		res.json({
 			status: 400,
 			msg: '账号或密码错误',
-		});
-	} else {
-		const token = jwt.sign({ 'admin': secret }, app.get('superSecret'))
-		res.json({
-			status: 200,
-			msg: 'ok',
-			token: token
-		});
+		})
 	}
+
+	let token = 'Bearer ' + jwt.sign({}, secretKey, {
+		expiresIn: 60 * 60 * 24 // 授权时效24小时
+	})
+
+	res.json({
+		status: 200,
+		msg: 'ok',
+		token
+	})
+})
+
+// 处理 404
+router.use((req, res, next) => {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
+
+// 处理500
+router.use((err, req, res, next) => {
+  if (err.name === 'UnauthorizedError') {
+    res.status(401).json({
+      code: 401,
+      message: 'invalid token',
+      data: err
+    });
+  } else {
+    res.status(err.status || 500).json({
+      code: err.status || 500,
+      message: err.message,
+      data: err
+    });
+  }
+});
+
 
 module.exports = router;
