@@ -1,58 +1,93 @@
-#  极客猿梦导航
+# 极客猿梦导航
 
-> 面向独立开发者的导航站
+> 独立开发者的导航站!
 
-## 简介
-极客猿梦导航，致力于方便独立开发者/程序员寻找各种网络资源。
+预览: [➡️ http://navigation.zcbing.cn/](http://navigation.zcbing.cn/)
 
-以前，我有很多导航资源，我都把它们收集在浏览器收藏夹中，可到一定量后，我发现想找一些网站不容易，因为当时添加它也没有做明确的备注，现在我将导航添加到**极客猿梦导航站**中，每个网站都包含一些子信息，尽管你不添加，还是会比收藏夹里面的更好找一点。
-
-![功能导图](./images/navigate.png)
-
-![首页](./images/page_index.png)
-
-![后台页](./images/page_admin.png)
-
-## 导航版本
+## V1.0 版本
 
 - [老版本纯静态导航版](https://github.com/geekape/geek-navigation/tree/master)：最初的一版静态页面，数据都写在页面里的。
 
-- [JSON静态导航版](https://github.com/geekape/geek-navigation/tree/json-navigation)：数据和页面分享，可以部署在`github`或`gitee`上使用，将dist目录下的文件上传到远程仓库里访问。
+- [JSON 静态导航版](https://github.com/geekape/geek-navigation/tree/json-navigation)：数据和页面分享，可以部署在`github`或`gitee`上使用，将 dist 目录下的文件上传到远程仓库里访问。
 
 - [数据库动态导航版](https://github.com/geekape/geek-navigation/tree/vue2)：功能最全的版本，后续会增加更多功能
 
-- [后台地址](http://navigate.ym1024.com/admin)：给你也访问不了呀
+## v2.0
 
+- vue 全家桶
+- elementUI
+
+⚠️ 用户提交网站，只需要填写网站 url 和分类，提交后爬虫会补信息，如 logo，标题和描述。
+
+### nginx配置
+nginx.conf中加如下配置，换上你自己ip地址
+```nginx
+location /api {
+  proxy_pass http://176.122.147.140:3000/api;
+  proxy_http_version 1.1;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection 'upgrade';
+  proxy_set_header Host $host;
+  proxy_cache_bypass $http_upgrade;
+}
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+### TODO
+
+- [ ] mongoose 联表优化
+- [x] 首页加 keep-live
+- [ ] 增加喜欢和浏览量
+- [ ] 增加提交作者名，信息
+- [ ] 增加搜索
+- [ ] 分页等接口优化
+- [ ] 审核列表状态切换
+- [ ] 提交排除重复网站
+- [x] 自动化部署
+- [ ] 常用分类
+- [ ] 最近添加
+- [x] 优化 README 文档
+- [x] 一键拒绝审核列表
+- [x] 后台网站编辑更新
+- [x] 爬虫爬取失败手动填写
+- [x] 验证 url
+- [x] websitelist
+- [x] 审核网站爬虫自动补全信息
+- [x] 用户登录，默认第一次登录账号为管理员
+
+![登录](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593546788-5b5fbe71-579f-43f7-8991-1138e444034d.jpeg?x-oss-process=image%2Fresize%2Cw_1016)
+
+![首页](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593547716-ad9b83f3-7586-4513-9552-09bf60454b91.jpeg?x-oss-process=image%2Fresize%2Cw_1016)
+
+![审核页](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593548792-f011d40e-6c53-4960-a22b-333a7e1fb45f.jpeg?x-oss-process=image%2Fresize%2Cw_1016)
+
+![分类页](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593549607-f86d5c36-6166-4645-ac30-39bfeecac4bf.jpeg?x-oss-process=image%2Fresize%2Cw_1016)
 
 ## 友情提示
 
-- 如果你对这个项目有兴趣，可点`star`保持关注，当然，你也可以`Fork`代码，自己完善这个项目，你愿意的话可以`pull`到我仓库来合并。
+> 一个好的产品，是需要不断打磨和完善的。
 
-- 你如果遇到什么困难或bug，随时可以在[issues](https://github.com/geekape/geek-navigation/issues)提出，我会尽快解决。
-
-### 待办
-- [x] 1. 添加网站必填项提示
-- [x] 2. 添加网站自定义分类切换状态
-- [x] 3. 按需加载指定分类，点击某个分类请求某个分类接口
-
-
+- 如果你对这个项目有兴趣，可点`star`保持关注。
+- 有什么建议和问题都可提[issues](https://github.com/geekape/geek-navigation/issues)或者加 qq 群
 
 ## 常见问题
+
 - [已解决的问题列表](https://github.com/geekape/geek-navigation/issues?q=is%3Aissue+is%3Aclosed)
 
-### 1. 什么是数据库版？什么是静态JSON版本？
-为了方便无需配置数据库的小白，提供了静态[JSON版本的导航](https://github.com/geekape/geek-navigation/tree/json-navigation)，静态版本只能本地修改JSON添加导航，没有管理后台。
+### 1. 什么是数据库版？什么是静态 JSON 版本？
 
-而相对于静态版的××数据库版本**，它提供了管理导航的界面，用户可在线提交网站，后台审核，并管理所有网站（推荐）
+为了方便无需配置数据库的小白，提供了静态[JSON 版本的导航](https://github.com/geekape/geek-navigation/tree/json-navigation)，静态版本只能本地修改 JSON 添加导航，没有管理后台。
 
-### 2. 修改后台登录密码
-打开根目录下的`server/router.js`文件，修改密钥**secret**的值。
+而相对于静态版的 ×× 数据库版本\*\*，它提供了管理导航的界面，用户可在线提交网站，后台审核，并管理所有网站（推荐）
 
-### 3. 本地mongodb没导航数据？
-运行爬虫文件`node reptile/index.js`,确保你已经开启了本地Mongodb数据库，就可以爬导航到本地的数据库了
-![后台页](./images/mongodb.png)
+### 2. 本地 mongodb 没导航数据？
 
-### 4. 本地运行
+运行爬虫文件`node reptile.js`,确保你已经开启了本地 Mongodb 数据库，就可以爬导航到本地的数据库了
+
+### 3. 本地运行
+
 ```js
 // 1. 下载代码
 git clone git@github.com:geekape/geek-navigation.git
@@ -61,7 +96,7 @@ git clone git@github.com:geekape/geek-navigation.git
 npm i 或者 cnpm i
 
 // 3.假设已启动mongodb，启动本地服务器
-node server/app.js
+nodemon server/app.js
 
 // 4. 运行项目
 npm run serve
@@ -70,6 +105,10 @@ npm run serve
 http://localhost:8080
 ```
 
+## 前端交流学习
 
+---
 
-
+| 个人微信号(zcb861013016)                                                                                    | QQ 交流群(361979424)                                                                                        |
+| ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| ![](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593545660-5385c319-49af-49a7-833e-25a3169721c6.jpeg) | ![](https://cdn.nlark.com/yuque/0/2020/jpeg/225518/1593593544745-f344575b-aaae-4d56-96bc-6c8d44df189a.jpeg) |

@@ -1,43 +1,55 @@
 
-import { request } from './config'
+import request from './config'
 
 
 const api = {
   getHome() {
-    return request('/api/index')
+    return request.get('/api/index')
   },
   addAudit(data) {
-    return request('/api/audit/add', 'post', data)
+    return request.post('/api/audit/add', data)
   },
-  getAuditList() {
-    return request('/api/audit/list')
+  getAuditList(status = 0) {
+    return request.get(`/api/audit/list?status=${status}`)
   },
   delAuditNav(data) {
-    return request('/api/audit/del', 'post', data)
+    return request.post('/api/audit/del', data)
+  },
+  fastRejectAudit() {
+    return request.post('/api/audit/fastReject')
   },
   addNav(data) {
-    return request('/api/nav/add', 'post', data)
+    return request.post('/api/nav/add', data)
   },
   editNav(data) {
-    return request('/api/nav/edit', 'post', data)
+    return request.post('/api/nav/edit', data)
   },
-  delNav(id, name) {
-    return request('/api/nav/del', 'post', {
+  delNav(id) {
+    return request.post('/api/nav/del', {
       id,
-      name
     })
   },
   findNav(id) {
-    return request('/api/nav/find', 'post', {
+    return request.post('/api/nav/find', {
       id
     })
   },
-  login(account, pwd) {
-    return request('/api/login', 'post', {
-      account,
-      pwd
-    })
-  }
+  login(data) {
+    return request.post('/api/login', data)
+  },
+
+  getCategoryList() {
+    return request.get('/api/category/list')
+  },
+  addCategory(data) {
+    return request.post('/api/category/add', data)
+  },
+  delCategory(id) {
+    return request.post('/api/category/del', { id })
+  },
+  editCategory(data) {
+    return request.post('/api/category/edit', data)
+  },
 }
 
 export default api

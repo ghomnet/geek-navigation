@@ -5,9 +5,10 @@ function resolve(dir) {
     return path.join(__dirname, dir)
 }
 module.exports = {
-    publicPath: './',
+    publicPath: '/',
     productionSourceMap: false,
     chainWebpack: config => {
+
         config.resolve.alias
             .set('images', resolve('src/assets/img/'))
             .set('styles', resolve('src/assets/styles/'))
@@ -17,7 +18,7 @@ module.exports = {
             sass: {
                 // @/ is an alias to src/
                 // so this assumes you have a file named `src/variables.scss`
-                data: `@import "@/assets/styles/style.scss";`
+                // data: `@import "@/assets/styles/style.scss";`
             }
 
         }
